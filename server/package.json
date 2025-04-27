@@ -1,0 +1,23 @@
+{
+  "name": "fortune-app-server",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "knex migrate:latest && knex seed:run && ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc",
+    "migrate": "knex migrate:latest",
+    "seed": "knex seed:run"
+  },
+  "dependencies": {
+    "express": "5.1.0",
+    "cors": "2.8.5",
+    "knex": "3.1.0",
+    "sqlite3": "5.1.7"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/node": "^20.7.1",
+    "@types/cors": "^2.8.13",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "5.8.3"
+  }
+}

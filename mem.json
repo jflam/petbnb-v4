@@ -1,0 +1,61 @@
+{
+  "nodes": [
+    {
+      "id": "root",
+      "name": "Monorepo root",
+      "observations": "Holds overarching package.json, dev script orchestration and .gitignore."
+    },
+    {
+      "id": "server",
+      "name": "Express+Knex backend",
+      "observations": "TypeScript Express app exposing GET /api/fortunes/random. Uses Knex with SQLite3, migrations and seeds."
+    },
+    {
+      "id": "client",
+      "name": "React SPA",
+      "observations": "Vite + React 19 app that fetches a random fortune from /api/fortunes/random and displays it."
+    },
+    {
+      "id": "database",
+      "name": "SQLite schema",
+      "observations": "Single fortunes table (id, text) created by migration 20250423_create_fortunes_table.js and populated by seed 01_fortunes_seed.js."
+    },
+    {
+      "id": "scripts",
+      "name": "Bootstrap script",
+      "observations": "scripts/bootstrap.sh installs root, server and client dependencies."
+    }
+  ],
+  "edges": [
+    {
+      "from": "root",
+      "to": "server",
+      "name": "contains",
+      "description": "Root directory houses the server folder and orchestrates its npm scripts."
+    },
+    {
+      "from": "root",
+      "to": "client",
+      "name": "contains",
+      "description": "Root directory houses the client folder and orchestrates its npm scripts."
+    },
+    {
+      "from": "root",
+      "to": "scripts",
+      "name": "includes",
+      "description": "Root includes a shell script that bootstraps dependencies."
+    },
+    {
+      "from": "server",
+      "to": "database",
+      "name": "manages",
+      "description": "Server migrations and seeds manage the SQLite schema and data."
+    },
+    {
+      "from": "client",
+      "to": "server",
+      "name": "calls API",
+      "description": "Client fetches fortunes via the /api/fortunes/random endpoint proxied to the server."
+    }
+  ]
+}

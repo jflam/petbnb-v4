@@ -1,0 +1,49 @@
+# Node.js dependencies
+node_modules/
+**/node_modules/
+
+# Vite cache
+.vite/
+
+# Build outputs
+dist/
+build/
+**/dist/
+**/build/
+
+# SQLite databases
+dev.sqlite3
+dev.sqlite3-journal
+*.sqlite
+*.sqlite3
+*.db
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+ts-node-dev.log*
+
+# Coverage reports
+coverage/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# IDE / editor
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
