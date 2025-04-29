@@ -16,7 +16,7 @@ exports.seed = async function(knex) {
   await knex('sitters').insert([
     {
       name: 'Sarah Johnson',
-      photo_url: 'https://randomuser.me/api/portraits/women/1.jpg',
+      photo_url: 'http://localhost:3000/images/sitters/sarah_johnson.png',
       rate: 45.00,
       rating: 4.8,
       review_count: 127,
@@ -34,7 +34,7 @@ exports.seed = async function(knex) {
     },
     {
       name: 'Michael Chen',
-      photo_url: 'https://randomuser.me/api/portraits/men/2.jpg',
+      photo_url: 'http://localhost:3000/images/sitters/michael_chen.png',
       rate: 55.00,
       rating: 4.9,
       review_count: 89,
@@ -52,7 +52,7 @@ exports.seed = async function(knex) {
     },
     {
       name: 'Emily Rodriguez',
-      photo_url: 'https://randomuser.me/api/portraits/women/3.jpg',
+      photo_url: 'http://localhost:3000/images/sitters/emily_rodriguez.png',
       rate: 40.00,
       rating: 4.7,
       review_count: 56,
@@ -70,7 +70,7 @@ exports.seed = async function(knex) {
     },
     {
       name: 'David Wilson',
-      photo_url: 'https://randomuser.me/api/portraits/men/4.jpg',
+      photo_url: 'http://localhost:3000/images/sitters/david_wilson.png',
       rate: 60.00,
       rating: 5.0,
       review_count: 32,
@@ -88,7 +88,7 @@ exports.seed = async function(knex) {
     },
     {
       name: 'Jessica Martinez',
-      photo_url: 'https://randomuser.me/api/portraits/women/5.jpg',
+      photo_url: 'http://localhost:3000/images/sitters/jessica_martinez.png',
       rate: 35.00,
       rating: 4.6,
       review_count: 19,
@@ -106,7 +106,7 @@ exports.seed = async function(knex) {
     },
     {
       name: 'Daniel Thompson',
-      photo_url: 'https://randomuser.me/api/portraits/men/6.jpg',
+      photo_url: 'http://localhost:3000/images/sitters/daniel_thompson.png',
       rate: 50.00,
       rating: 4.5,
       review_count: 42,
@@ -124,7 +124,7 @@ exports.seed = async function(knex) {
     },
     {
       name: 'Sophia Lee',
-      photo_url: 'https://randomuser.me/api/portraits/women/7.jpg',
+      photo_url: 'http://localhost:3000/images/sitters/sophia_lee.png',
       rate: 65.00,
       rating: 4.9,
       review_count: 76,
@@ -142,7 +142,7 @@ exports.seed = async function(knex) {
     },
     {
       name: 'James Anderson',
-      photo_url: 'https://randomuser.me/api/portraits/men/8.jpg',
+      photo_url: 'http://localhost:3000/images/sitters/james_anderson.png',
       rate: 45.00,
       rating: 4.7,
       review_count: 31,
@@ -160,7 +160,7 @@ exports.seed = async function(knex) {
     },
     {
       name: 'Olivia Garcia',
-      photo_url: 'https://randomuser.me/api/portraits/women/9.jpg',
+      photo_url: 'http://localhost:3000/images/sitters/olivia_garcia.png',
       rate: 55.00,
       rating: 4.8,
       review_count: 23,
@@ -178,7 +178,7 @@ exports.seed = async function(knex) {
     },
     {
       name: 'Ethan Nguyen',
-      photo_url: 'https://randomuser.me/api/portraits/men/10.jpg',
+      photo_url: 'http://localhost:3000/images/sitters/ethan_nguyen.png',
       rate: 40.00,
       rating: 4.6,
       review_count: 14,

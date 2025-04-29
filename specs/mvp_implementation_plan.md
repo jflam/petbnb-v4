@@ -40,7 +40,7 @@ Indexes:
     "first_name": "Maya",
     "last_name": "Rodriguez",
     "bio": "Former vet tech who loves dogs & cats.",
-    "photo_url": "https://source.unsplash.com/320x320/?pet", // high‑quality random pet photo
+    "photo_url": "http://localhost:3000/images/sitters/maya_rodriguez.png", 
     "hourly_rate": 45,
     "accepts_cats": true,
     "accepts_dogs": true,
@@ -57,8 +57,11 @@ Indexes:
   "...18 more..."
 ]
 ```
-*(Full JSON lives in `seeds/02_sitters_seed.js` – use  
-`https://source.unsplash.com/320x320/?{dog|cat}` for variety.)*
+*(Full JSON lives in `seeds/02_sitters_seed.js)`*
+
+> 📸  Place all generated sitter images in  
+> `client/public/images/sitters/firstname_lastname.png`  
+> (Vite serves these at `http://localhost:3000/images/sitters/...` during dev; Express can statically serve the same folder in prod).
 
 ---
 
@@ -175,3 +178,20 @@ Pagination: cursor (`?cursor=...&limit=20`) in Phase 2.
 ---
 
 *End of plan – ready for engineering breakdown & ticketing.*
+
+---
+
+## Seed Image Prompts  
+
+| Sitter | Prompt |
+|--------|--------|
+| Sarah Johnson | “Cheerful pet sitter Sarah Johnson playing fetch with a golden retriever in a sun‑drenched suburban backyard, candid lifestyle photography, square aspect ratio for instagram” |
+| Michael Chen | “Professional sitter Michael Chen welcoming a happy corgi into a modern city apartment lobby, clean minimal aesthetic, square aspect ratio for instagram” |
+| Emily Rodriguez | “Cat‑lover Emily Rodriguez reading beside a window as an orange tabby naps on her lap, cozy hygge atmosphere, square aspect ratio for instagram” |
+| David Wilson | “Experienced caregiver David Wilson walking two well‑behaved huskies along a forested trail at golden hour, vibrant outdoor photography, square aspect ratio for instagram” |
+| Jessica Martinez | “Small‑pet specialist Jessica Martinez tending to a playful trio of guinea pigs in a bright organized pet room, soft pastel palette, square aspect ratio for instagram” |
+| Daniel Thompson | “Big‑dog friendly sitter Daniel Thompson giving a gentle giant great dane a bath in a backyard hose setup, upbeat action shot, square aspect ratio for instagram” |
+| Sophia Lee | “Top sitter Sophia Lee posing with multiple happy dogs on a stylish deck overlooking Lake Washington at sunset, premium lifestyle vibe, square aspect ratio for instagram” |
+| James Anderson | “Casual walker James Anderson strolling through a leafy neighborhood park with a beagle and coffee in hand, relaxed weekend feel, square aspect ratio for instagram” |
+| Olivia Garcia | “Multi‑species sitter Olivia Garcia feeding a parakeet while a friendly labrador watches attentively in a bright kitchen, colorful home scene, square aspect ratio for instagram” |
+| Ethan Nguyen | “Cat whisperer Ethan Nguyen gently brushing a long‑haired calico on a sunlit windowsill filled with houseplants, tranquil mood, square aspect ratio for instagram” |
