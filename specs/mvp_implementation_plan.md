@@ -40,7 +40,7 @@ Indexes:
     "first_name": "Maya",
     "last_name": "Rodriguez",
     "bio": "Former vet tech who loves dogs & cats.",
-    "photo_url": "https://place-puppy.com/300x300",
+    "photo_url": "https://source.unsplash.com/320x320/?pet", // high‑quality random pet photo
     "hourly_rate": 45,
     "accepts_cats": true,
     "accepts_dogs": true,
@@ -57,7 +57,8 @@ Indexes:
   "...18 more..."
 ]
 ```
-*(Full JSON lives in `seeds/02_sitters_seed.js`)*
+*(Full JSON lives in `seeds/02_sitters_seed.js` – use  
+`https://source.unsplash.com/320x320/?{dog|cat}` for variety.)*
 
 ---
 
