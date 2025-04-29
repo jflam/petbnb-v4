@@ -245,7 +245,7 @@ body {
 
 .sitter-photo-container {
   position: relative;
-  height: 200px;
+  aspect-ratio: 1 / 1;
 }
 
 .sitter-photo {

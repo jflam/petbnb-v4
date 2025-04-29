@@ -7,7 +7,7 @@
 Deliver a production‑ready search & listing experience that lets any visitor:
 * Search by location + date range.
 * Apply key filters (service type, pet type, dog size, nightly rate, rating, certifications, distance, **Top Sitter**).
-* View sitter cards in a responsive grid (optional map view in Phase 2).
+* View sitter cards in a responsive grid with square images (optional map view in Phase 2).
 * Click a card to open the sitter detail route (stub in MVP).
 
 ---
@@ -140,7 +140,7 @@ Pagination: cursor (`?cursor=...&limit=20`) in Phase 2.
   Fetches `/api/v1/sitters/search` when query params change. Handles `loading`, `error`, `data`.  
 
 * **SitterCard**  
-  Displays hero img, name, rate, stars badge, distance, cert icons, repeat‑client pill. Click → `/sitters/:id?prevQuery=…`.  
+  Displays hero img in a square aspect ratio, name, rate, stars badge, distance, cert icons, repeat‑client pill. Click → `/sitters/:id?prevQuery=…`.  
 
 * **EmptyState**  
   Illustration + “No sitters match your filters” + **Reset Filters** button (R9).  

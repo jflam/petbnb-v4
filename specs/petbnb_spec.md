@@ -4,7 +4,7 @@ PetBnB is an Airbnb‑style web marketplace that connects pet owners with verifi
 The high‑level layout is derived from the provided sketch:
 * **Global Search Bar** across the top for free‑text location, date, and keyword queries.
 * **Filters Sidebar** on the left with toggleable facets (dates, pet type, services, price, distance, rating, sitter certifications).
-* **Listing Grid** in the main content area displaying sitter cards (photo, name, rate, rating, quick descriptors).
+* **Listing Grid** in the main content area displaying sitter cards (square photos, name, rate, rating, quick descriptors).
 * **Profile / Settings Menu** in the top‑right corner (avatar icon) that conditionally shows login/register or account links.
 
 Significant changes to the product vision, user flows, or page layout must be reflected in this Overview.
@@ -59,7 +59,7 @@ Pet owners need a fast, trustworthy way to discover sitters who meet their locat
 * **R3**: Anonymous sessions default location via IP geolocation with fallback.
 * **R4**: Results surface in a responsive list **and** optional map view; the map auto‑pans with list results and can be toggled on/off.
 * **R5**: `/api/v1/sitters/search` supports all filter params and returns sitter objects with distance, verification badges, `availability_updated_at`, and `repeat_client_count`.
-* **R6**: Each sitter card displays hero photo, name, nightly rate, star rating (one decimal), distance label (e.g., “2.1 mi”), verification badges, and repeat‑client metric.
+* **R6**: Each sitter card displays a square hero photo, nightly rate, star rating (one decimal), distance label (e.g., “2.1 mi”), verification badges, and repeat‑client metric.
 * **R7**: Logged‑in users see sitters ranked by compatibility; ranking algorithm also factors acceptance rate and response time.
 * **R8**: Clicking a card routes to `/sitters/{id}` while preserving query params.
 * **R9**: Empty‑state UI includes illustration, explanatory copy, and a **Reset Filters** call‑to‑action.
