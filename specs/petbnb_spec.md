@@ -1,110 +1,143 @@
+# PetBnB – Product Specification (v1.1 – Rover‑informed)
+
 ## Overview
-PetBnB is an Airbnb‑style web marketplace that connects pet owners with verified sitters. The core value proposition is to make finding safe, reliable, and convenient care for pets as frictionless as booking a short‑term rental. The initial web release focuses on surfacing sitter listings that match an owner’s search criteria, visible to both anonymous visitors and authenticated users.
 
-The high‑level layout is derived from the provided sketch:
-* **Global Search Bar** across the top for free‑text location, date, and keyword queries.
-* **Filters Sidebar** on the left with toggleable facets (dates, pet type, services, price, distance, rating, sitter certifications).
-* **Listing Grid** in the main content area displaying sitter cards (square photos, name, rate, rating, quick descriptors).
-* **Profile / Settings Menu** in the top‑right corner (avatar icon) that conditionally shows login/register or account links.
+PetBnB is an Airbnb‑style, two‑sided marketplace that connects pet owners with background‑checked, verified sitters for in‑home or in‑sitter‑home pet care.  Owners can quickly discover nearby sitters who match their pets’ needs, review sitter profiles, and book securely through the platform.  Sitters gain a flexible income stream while PetBnB handles marketing, trust & safety, and payment processing.
 
-Significant changes to the product vision, user flows, or page layout must be reflected in this Overview.
+This revision incorporates **deep competitive research on Rover** to sharpen our sitter‑discovery MVP and ensure feature‑parity—or strategic differentiation—at launch.
 
 ---
+
 ## Competitive Landscape
-### Rover
-*Founded in 2011, Rover is the largest North‑American marketplace for pet boarding, house sitting, and dog walking. Key learnings that inform PetBnB’s MVP:*
 
-**Discovery UX**
-* Multi‑category service filter (Boarding, House Sitting, Drop‑In, Day Care, Dog Walking) sits at the top of the filter stack and visibly toggles listings.
-* Map‑and‑list dual view lets owners visually gauge sitter density; the map auto‑updates as the user pans. 
-* Sidebar filters include: date range, pet type (dog/cat), dog size buckets, nightly rate slider, “Star Sitter” toggle, and add‑on services (puppy care, bathing, training).
+### Rover (Deep‑dive)
 
-**Listing Card Signals**
-* Prominent sitter photo, nightly rate, star rating, review count, repeat‑client count, and distance from search center.
-* Trust badges: *Verified Background Check*, *Star Sitter*, and *Rover 101* training give instant credibility.
-* Availability freshness label (e.g., “Updated 3 days ago”) reduces stale bookings.
+- **Founded / Scale** – 2011; > 2 million pet parents, 500 K+ sitters globally. Revenue from 20 % marketplace fee.
+- **Core Services** – Boarding, House Sitting, Drop‑in Visits, Doggy Day Care, Dog Walking.
+- **Search UX**
+  - Unified **location/date** search bar with auto‑complete.
+  - Toggleable **Map + List** view.
+  - Extensive filters: pet type & size, age, special needs, service type, price range, home features (fenced yard, children‑free), sitter attributes (home full‑time, accepts last‑minute bookings).
+- **Listing Card Elements** – Hero image; sitter name; ★ average rating + review count; starting price; response time (“Responds within 15 min”); repeat‑client %; distance badge.
+- **Ranking Signals** – Distance & availability → reputation factors (rating, response rate/time, repeat‑client %, booking rate) → profile completeness; new sitters receive temporary exposure boost.
+- **Trust & Safety** – Mandatory basic background check (U.S.), Rover Guarantee (24/7 vet assistance), SECURE payments, photo updates.
+- **Pain Points (Opportunities)** – Algorithm opacity; high fees; limited license verification for specialised care; complaints around requests outside sitter radius.
 
-**Trust & Safety**
-* All sitters pass a third‑party **enhanced criminal background check** and bookings are backed by **RoverProtect** (up to $25k vet reimbursement & 24/7 support).
+### Wag! / TrustedHousesitters
 
-**Ranking Insights**
-* Algorithm weights acceptance rate, response time, review quality, and grants a temporary boost for new sitters to ensure marketplace liquidity.
-
-These practices highlight the importance of credibility badges, up‑to‑date availability signals, map context, and robust filters—each folded into our MVP below.
-
-### Wag!
-* Known for on‑demand dog walking and boarding.
-* Strengths: background‑checked walkers, live GPS tracking.
-* Weaknesses: higher service fees, less emphasis on overnight care.
-
-_Additional competitors will be added as they are researched._
+*Placeholders – to be completed later.*
 
 ---
+
 ## Features
-### 1. Sitter Discovery & Listing (MVP Feature)
+
+### 1  Sitter Discovery & Search (MVP – Rover‑informed)
+
 #### Motivation
-Pet owners need a fast, trustworthy way to discover sitters who meet their location, schedule, and service requirements. This feature solves the “where do I start?” problem when browsing the marketplace.
 
-#### User Stories
-* **Anon‑Browse‑01:** As an unauthenticated pet owner, I can browse a list of sitters near a default location so I can gauge availability before creating an account.
-* **Search‑01:** As any user, I can enter a city or ZIP code, select service dates, and see updated sitter results so that listings are relevant to my trip.
-* **Filter‑01:** As any user, I can refine results by price, rating, pet type, and services to quickly narrow my choices.
-* **Auth‑Personalize‑01:** As an authenticated user with saved pets, the platform pre‑filters sitters who accept my pet’s type and size.
-* **Card‑Details‑01:** As any user, I can click a sitter card to open a details page containing bio, availability calendar, and reviews.
+Pet owners must evaluate sitter options instantly—without account friction—while receiving confidence‑building data (rating, response time, repeat clients) pioneered by market leader Rover.  Leveraging these patterns speeds user trust and increases conversion.
 
-#### Requirements
-1. 
-* **R1**: Global search bar accepts location text and date range; hitting **Enter** refreshes results.
-* **R2**: Filters sidebar includes service type (boarding, house sitting, drop‑in, day care, walking), pet type, dog size buckets, nightly rate slider, rating, sitter certifications, distance slider, and a *Top Sitter* toggle.
-* **R3**: Anonymous sessions default location via IP geolocation with fallback.
-* **R4**: Results surface in a responsive list **and** optional map view; the map auto‑pans with list results and can be toggled on/off.
-* **R5**: `/api/v1/sitters/search` supports all filter params and returns sitter objects with distance, verification badges, `availability_updated_at`, and `repeat_client_count`.
-* **R6**: Each sitter card displays a square hero photo, nightly rate, star rating (one decimal), distance label (e.g., “2.1 mi”), verification badges, and repeat‑client metric.
-* **R7**: Logged‑in users see sitters ranked by compatibility; ranking algorithm also factors acceptance rate and response time.
-* **R8**: Clicking a card routes to `/sitters/{id}` while preserving query params.
-* **R9**: Empty‑state UI includes illustration, explanatory copy, and a **Reset Filters** call‑to‑action.
+#### User Stories (additions highlighted)
 
-#### Acceptance Criteria (Gherkin)
+- **LO‑US‑03** As a *logged‑out owner*, I can switch between **List** and **Map** view so that I visualise sitter proximity.
+- **LI‑US‑04** As a *logged‑in owner*, I can filter sitters by **pet size** (XS–XL) and **special needs** (medication, senior care) so that my unique requirements are met.
+- **LI‑US‑05** As a *logged‑in owner*, I can sort results by **rating**, **price**, or **distance** so that I can prioritise what matters most.
+
+#### Requirements (delta additions)
+
+1. **View Toggle** – Add Map/List switch (default List).  Map pins cluster on zoom out.
+2. **Expanded Filters**
+   - **Pet Size** (XS <15 lb, S 15‑39 lb, M 40‑69 lb, L 70‑99 lb, XL ≥100 lb).
+   - **Special Needs** checkbox group (Puppy <1 yr, Senior >8 yr, Medication‑required, Reactive).
+   - **Home Features** (Fenced Yard, Smoke‑free, No other pets).
+3. **Listing Card Enhancements**
+   - ★ Rating displayed with tooltip showing review count.
+   - **Response Time** badge (derived from median of last 30 enquiries).
+   - **Repeat‑client %** indicator.
+   - Two service price points shown if sitter offers multiple services (e.g., Boarding from \$45 · Day Care from \$30).
+4. **Ranking Algorithm (v0.5)** – Score = 0.4 × Distance (normalised) + 0.25 × Rating + 0.15 × Availability match + 0.1 × Response Rate + 0.1 × Repeat‑client %.  Tunable weights stored in Config.
+5. **Sort Options** – Distance (default), Price (asc), Rating (desc).
+6. **URL‑driven State** extended to `petSize`, `specialNeeds[]`, `sort`.
+
+#### Acceptance Criteria (additions)
+
 ```gherkin
-Feature: Sitter Discovery
-  Scenario: Anonymous user performs a basic search
-    Given I am not logged in
-    When I navigate to "/" and enter "Seattle, WA" in the search bar and submit
-    Then I should see sitter cards located in Seattle within the listing grid
+  Scenario: Toggle to map view
+    Given I have performed a sitter search
+    When I click the "Map" toggle
+    Then the results grid is replaced by an interactive map with clustered sitter pins
+    And the List/Map toggle indicates "List" as the alternate view
 
-  Scenario: Authenticated user sees personalized ranking
-    Given I am logged in as "john@example.com" with a saved cat profile
-    When I search for "Seattle, WA" with dates "2025‑05‑01 to 2025‑05‑05"
-    Then sitters who accept cats should appear in the first positions of the grid
+  Scenario: Filter by pet size and special needs
+    Given I have performed a search
+    When I select pet size "M" and special need "Medication‑required"
+    Then only sitters who accept medium dogs and administer medication are shown
 
-  Scenario: Applying multiple filters narrows results
-    Given the listing grid shows 100 sitters
-    When I select "Price ≤ $50" and "Rating ≥ 4.5"
-    Then the grid should update to ≤ 100 sitters and all displayed sitters must meet both criteria
-
-  Scenario: No results triggers empty state
-    Given I filter by "Price ≤ $10" and "Rating ≥ 5"
-    Then an empty‑state illustration and message "No sitters match your filters" should appear
+  Scenario: Sort by rating
+    Given results are displayed
+    When I choose the "Rating" sort option
+    Then sitter cards are ordered by rating descending
 ```
 
-#### Testing (Playwright)
-* **test‑anon‑search.spec.ts**
-  * Load home page → fill search input → assert URL contains query params → wait for API call → expect at least one sitter card.
-* **test‑auth‑personalization.spec.ts**
-  * Login fixture (create cat profile) → perform search → assert that first ten cards each include "🐱" badge.
-* **test‑filtering.spec.ts**
-  * Perform unfiltered search → capture initial card count → toggle price slider → expect reduced count and all prices ≤ slider value.
-* **test‑no‑results.spec.ts**
-  * Apply impossible filter combination → expect `data‑cy=empty‑state` element to be visible.
+#### Testing (Playwright additions)
 
----
-### Backlog Features (stubs)
-1. Authentication & Onboarding
-2. Sitter Profile Page
-3. Booking & Payment Flow
-4. Messaging & Notifications
-5. Reviews & Trust Badges
-6. Responsive Mobile Layout
+- **mapToggle.spec.ts** – Assert map renders via Leaflet, clusters at <8 zoom.
+- **petSizeFilter.spec.ts** – Seed two sitters (S, M); apply size filter; assert correct filtering.
+- **sortRating.spec.ts** – Ensure sorting toggles query param and order.
 
-Detailed specs will be added in separate Feature sections as the project progresses.
+### 2  Interactive Map Behavior & Sitter Visibility
+
+#### Core Map Features
+- **Map / List Synchronisation**  
+  - Toggle sits in the results header (default **List**).  
+  - In **Map** view, panning/zooming does **not** auto‑refresh; instead a sticky **Search this area** button appears top‑right.  
+  - An optional *Auto‑update as map moves* checkbox triggers live updates (mirrors Rover UX). [1]
+- **Initial Viewport** – Centered on the user‑entered location; zoom calibrated to include ~50 closest matches (fallback: 15‑mile radius).
+- **Pins & Clustering**  
+  - Pins are **numbered** to match their card order in the side list.  
+  - Marker clustering activates when > 50 sitters share the viewport; cluster bubbles display count and "explode" on zoom.
+- **Heat‑Map Shading** – When the total sitter count in the current viewport exceeds **200**, render a translucent red‑to‑yellow density overlay beneath the pins.  Heat disappears when zoomed in beyond level 13 to avoid visual clutter.
+- **Pin Metadata** – Overlays display nightly price, ★ rating, **repeat‑client %**, and Star‑Sitter badge. Hover reveals a mini‑profile tooltip (photo, name, distance, *View Profile*).
+- **Privacy‑First Geocoding** – Apply ±400 ft random offset before rendering pins; the true address is shown only after a booking is confirmed, improving on Rover’s exact pins. [2]
+- **Service Radius Overlay (Optional)** – Toggle a dashed circle showing each sitter’s travel radius; compensates for Rover’s fixed ~1‑mile halo. [3]
+- **Filter Coupling** – Active filters (pet size, special needs, price, etc.) limit visible pins; filtered‑out sitters fade to 30 % opacity and are non‑interactive.
+- **Accessibility & Keyboard Support** – Map is fully navigable via arrow keys + Enter; an ARIA‑live region announces the top three visible sitters whenever the viewport changes.
+- **Performance Targets** – Initial map bundle ≤ 250 kB (gzipped); first pin render ≤ 1 s on 4 G using Mapbox GL JS with lazy‑loaded vector tiles.
+- **Analytics Hooks** – Emit `map_viewport_changed`, `map_pin_clicked`, `search_this_area`, and `heatmap_rendered` events with bounding‑box and result count.
+
+#### Acceptance Criteria
+```gherkin
+Scenario: Map search updates only after user confirmation
+  Given I have toggled to Map view
+  When I drag the map 10 miles south
+  Then the "Search this area" button becomes enabled
+  And sitter pins do not change until I press the button
+
+Scenario: Privacy offset on pins
+  Given a sitter’s geocoded address at LAT 47.6205, LNG -122.3493
+  When the map renders pins
+  Then the sitter’s pin latitude and longitude differ by at least 50 ft and no more than 400 ft from the true address
+```
+
+
+
+### 3  Owner ↔ Sitter Messaging
+
+*Unchanged – to be spec’d next.*
+
+### 4  Booking & Payments
+
+*Unchanged – placeholder.*
+
+
+
+####
+
+
+## References
+[1] Rover.com Community Q&A: “Can I search for a service member by neighborhood?” — details Rover’s *Search this area* UX (accessed 29 Apr 2025).
+
+[2] Reddit thread r/RoverPetSitting: “Rover search shows home addresses of sitters” — discusses privacy concerns around exact pin locations (accessed 29 Apr 2025).
+
+[3] Rover.com Community Q&A: “Pet sitters service area map is not accurate anymore” — notes loss of adjustable service‑radius halo (accessed 29 Apr 2025).
 
