@@ -11,9 +11,7 @@ interface MapViewProps {
   onMapMoved?: (lngLat: { lng: number; lat: number }) => void;
 }
 
-// Use a placeholder token for development
-// In production, we would use an env variable from the backend
-const MAPBOX_TOKEN = 'pk.placeholder_token'; 
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
 export default function MapView({
   sitters,
