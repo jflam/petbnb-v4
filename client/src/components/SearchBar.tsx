@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef, KeyboardEvent } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import debounce from 'lodash.debounce';
@@ -32,7 +32,8 @@ export default function SearchBar({
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [suggestions, setSuggestions] = useState<SearchLocation[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
   const [selectedLocation, setSelectedLocation] = useState<SearchLocation | null>(
     initialLatitude && initialLongitude
       ? {
@@ -44,12 +45,14 @@ export default function SearchBar({
   );
   
   const suggestionsRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Close suggestions when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
+      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node) && 
+          inputRef.current && !inputRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
       }
     }
 
@@ -59,6 +62,11 @@ export default function SearchBar({
     };
   }, []);
 
+  // Reset highlighted index when suggestions change
+  useEffect(() => {
+    setHighlightedIndex(0);
+  }, [suggestions]);
+
   const fetchGeocodingSuggestions = useCallback(
     debounce(async (query: string) => {
       if (query.length < 3) {
@@ -66,14 +74,20 @@ export default function SearchBar({
         return;
       }
 
+      console.log('Fetching geocoding suggestions for:', query);
       try {
-        const response = await fetch(`/api/geocode?q=${encodeURIComponent(query)}`);
+        const url = `/api/geocode?q=${encodeURIComponent(query)}`;
+        console.log('Geocoding URL:', url);
+        const response = await fetch(url);
+        
         if (!response.ok) {
-          throw new Error('Failed to fetch geocoding suggestions');
+          throw new Error(`Failed to fetch geocoding suggestions: ${response.status}`);
         }
+        
         const data = await response.json();
+        console.log('Geocoding results:', data);
         setSuggestions(data);
-        setShowSuggestions(true);
+        setIsOpen(true);
       } catch (error) {
         console.error('Error fetching geocoding suggestions:', error);
       }
@@ -90,7 +104,37 @@ export default function SearchBar({
   const handleSuggestionSelect = (suggestion: SearchLocation) => {
     setLocationText(suggestion.locationLabel);
     setSelectedLocation(suggestion);
-    setShowSuggestions(false);
+    setSuggestions([]);
+    setIsOpen(false);
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (!isOpen) return;
+    
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setHighlightedIndex(prev => 
+          prev < suggestions.length - 1 ? prev + 1 : prev
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setHighlightedIndex(prev => 
+          prev > 0 ? prev - 1 : 0
+        );
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (suggestions[highlightedIndex]) {
+          handleSuggestionSelect(suggestions[highlightedIndex]);
+        }
+        break;
+      case 'Escape':
+        e.preventDefault();
+        setIsOpen(false);
+        break;
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -113,25 +157,50 @@ export default function SearchBar({
         <div className="search-container">
           <div className="location-container">
             <input
+              ref={inputRef}
               type="text"
               className="search-input"
               placeholder="Enter city or ZIP code..."
               value={locationText}
               onChange={handleLocationChange}
-              onFocus={() => locationText.length >= 3 && setShowSuggestions(true)}
+              onFocus={() => locationText.length >= 3 && setIsOpen(true)}
+              onKeyDown={handleKeyDown}
+              role="combobox"
+              aria-expanded={isOpen}
+              aria-haspopup="listbox"
+              aria-controls="suggestions-listbox"
+              aria-activedescendant={isOpen && suggestions.length > 0 ? `suggestion-${highlightedIndex}` : undefined}
             />
             
-            {showSuggestions && suggestions.length > 0 && (
+            {isOpen && suggestions.length > 0 && (
               <div className="suggestions-dropdown" ref={suggestionsRef}>
-                {suggestions.map((suggestion, index) => (
-                  <div
-                    key={index}
-                    className="suggestion-item"
-                    onClick={() => handleSuggestionSelect(suggestion)}
-                  >
-                    {suggestion.locationLabel}
-                  </div>
-                ))}
+                <ul 
+                  className="suggestions" 
+                  role="listbox" 
+                  id="suggestions-listbox"
+                >
+                  {suggestions.map((suggestion, index) => (
+                    <li
+                      id={`suggestion-${index}`}
+                      key={index}
+                      className={`suggestion-item ${index === highlightedIndex ? 'highlighted' : ''}`}
+                      onClick={() => handleSuggestionSelect(suggestion)}
+                      onMouseEnter={() => setHighlightedIndex(index)}
+                      role="option"
+                      aria-selected={index === highlightedIndex}
+                    >
+                      <span role="img" aria-label="location">📍</span> {suggestion.locationLabel}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {isOpen && suggestions.length === 0 && locationText.length >= 3 && (
+              <div className="suggestions-dropdown" ref={suggestionsRef}>
+                <div className="suggestion-item-empty">
+                  Searching for locations...
+                </div>
               </div>
             )}
           </div>
