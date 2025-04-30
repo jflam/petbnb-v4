@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import Map, { Marker, Popup, NavigationControl } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Sitter } from '../types';
@@ -21,33 +21,7 @@ export default function MapView({
   onMapMoved
 }: MapViewProps) {
   const [selectedSitter, setSelectedSitter] = useState<Sitter | null>(null);
-  const [viewport, setViewport] = useState({
-    latitude,
-    longitude,
-    zoom: 11
-  });
-
   const mapRef = useRef<any>(null);
-
-  useEffect(() => {
-    // Center map on the provided coordinates whenever they change
-    setViewport(prev => ({
-      ...prev,
-      latitude,
-      longitude
-    }));
-  }, [latitude, longitude]);
-
-  const handleMapMoved = useCallback(() => {
-    if (mapRef.current && onMapMoved) {
-      const center = mapRef.current.getMap().getCenter();
-      onMapMoved({ lng: center.lng, lat: center.lat });
-    }
-  }, [onMapMoved]);
-
-  const handleMarkerClick = (sitter: Sitter) => {
-    setSelectedSitter(sitter);
-  };
 
   const calculateInitialZoom = () => {
     if (sitters.length === 0) return 11;
@@ -63,20 +37,30 @@ export default function MapView({
     return 9;
   };
 
+  const handleMove = useCallback(() => {
+    if (mapRef.current && onMapMoved) {
+      const center = mapRef.current.getMap().getCenter();
+      onMapMoved({ lng: center.lng, lat: center.lat });
+    }
+  }, [onMapMoved]);
+
+  const handleMarkerClick = (sitter: Sitter) => {
+    setSelectedSitter(sitter);
+  };
+
   return (
     <div className="map-container">
       <Map
         ref={mapRef}
         mapboxAccessToken={MAPBOX_TOKEN}
-        {...viewport}
-        style={{width: '100%', height: '100%'}}
-        mapStyle="mapbox://styles/mapbox/streets-v11"
-        onMoveEnd={handleMapMoved}
         initialViewState={{
           latitude,
           longitude,
           zoom: calculateInitialZoom()
         }}
+        style={{width: '100%', height: '100%'}}
+        mapStyle="mapbox://styles/mapbox/streets-v11"
+        onMoveEnd={handleMove}
       >
         <NavigationControl position="top-right" />
         
@@ -136,7 +120,7 @@ export default function MapView({
         <div className="search-area-button-container">
           <button 
             className="search-area-button"
-            onClick={handleMapMoved}
+            onClick={handleMove}
           >
             Search this area
           </button>
