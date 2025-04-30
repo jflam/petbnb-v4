@@ -4,9 +4,10 @@ import { Sitter } from '../types';
 interface SitterCardProps {
   sitter: Sitter;
   onSelect: (sitterId: number) => void;
+  index?: number; // For numbering on the map
 }
 
-export default function SitterCard({ sitter, onSelect }: SitterCardProps) {
+export default function SitterCard({ sitter, onSelect, index }: SitterCardProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -55,11 +56,51 @@ export default function SitterCard({ sitter, onSelect }: SitterCardProps) {
     });
   };
 
+  // Calculate repeat client percentage
+  const calculateRepeatClientPercentage = () => {
+    if (sitter.review_count === 0) return 0;
+    return Math.round((sitter.repeat_client_count / sitter.review_count) * 100);
+  };
+
+  // Format services with pricing
+  const formatServicePricing = () => {
+    if (sitter.services.length <= 1) {
+      return (
+        <div className="sitter-price">${sitter.rate}/night</div>
+      );
+    }
+    
+    // For multiple services, show first two with pricing
+    const serviceLabels: Record<string, string> = {
+      'boarding': 'Boarding',
+      'house_sitting': 'House Sitting',
+      'drop_in': 'Drop-In',
+      'day_care': 'Day Care',
+      'walking': 'Walking'
+    };
+    
+    const displayServices = sitter.services.slice(0, 2);
+    return (
+      <div className="sitter-multi-price">
+        {displayServices.map((service, i) => (
+          <div key={service} className="service-price">
+            {serviceLabels[service] || service} from ${Math.round(sitter.rate * (i === 0 ? 1 : 0.8))}
+            {i === 0 && displayServices.length > 1 ? ' · ' : ''}
+          </div>
+        ))}
+        {sitter.services.length > 2 && 
+          <div className="more-services">+{sitter.services.length - 2} more</div>
+        }
+      </div>
+    );
+  };
+
   return (
     <div className="sitter-card" onClick={() => onSelect(sitter.id)}>
       <div className="sitter-photo-container">
         <img src={sitter.photo_url} alt={sitter.name} className="sitter-photo" />
         {sitter.top_sitter && <div className="top-sitter-badge">⭐ Top Sitter</div>}
+        {index !== undefined && <div className="sitter-index-badge">{index + 1}</div>}
       </div>
       
       <div className="sitter-info">
@@ -68,11 +109,17 @@ export default function SitterCard({ sitter, onSelect }: SitterCardProps) {
           <div className="sitter-distance">{sitter.distance} mi</div>
         </div>
         
-        <div className="sitter-rating" title={`Based on ${sitter.review_count} reviews`}>
-          ⭐ {sitter.rating.toFixed(1)} ({sitter.review_count} reviews)
+        <div className="sitter-rating">
+          <div className="rating-tooltip">
+            <span className="rating-stars">⭐ {sitter.rating.toFixed(1)}</span>
+            <span className="rating-tooltip-text">
+              {sitter.review_count} reviews
+              {sitter.repeat_client_count > 0 && ` · ${calculateRepeatClientPercentage()}% repeat clients`}
+            </span>
+          </div>
         </div>
         
-        <div className="sitter-price">${sitter.rate}/night</div>
+        {formatServicePricing()}
         
         <div className="sitter-pet-types">{getPetTypeIcons(sitter.pet_types)}</div>
         
@@ -81,8 +128,8 @@ export default function SitterCard({ sitter, onSelect }: SitterCardProps) {
         <div className="sitter-badges">
           {sitter.verified && <span className="verified-badge">✓ Verified</span>}
           {sitter.repeat_client_count > 0 && (
-            <span className="repeat-clients-badge" title={`${Math.round((sitter.repeat_client_count / (sitter.repeat_client_count + sitter.review_count - sitter.repeat_client_count)) * 100)}% repeat booking rate`}>
-              🔄 {sitter.repeat_client_count} repeat {sitter.repeat_client_count === 1 ? 'client' : 'clients'}
+            <span className="repeat-clients-badge" title={`${calculateRepeatClientPercentage()}% repeat booking rate`}>
+              🔄 {calculateRepeatClientPercentage()}% repeat clients
             </span>
           )}
           {sitter.median_response_time !== null && (

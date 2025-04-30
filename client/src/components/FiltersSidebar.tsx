@@ -85,9 +85,13 @@ export default function FiltersSidebar({
   };
 
   const handleDistanceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Convert to number explicitly and ensure we're passing a valid value
+    const distanceValue = e.target.value ? Number(e.target.value) : null;
+    console.log('Setting distance filter:', distanceValue);
+    
     onFilterChange({
       ...filters,
-      distance: e.target.value ? Number(e.target.value) : null
+      distance: distanceValue
     });
   };
 

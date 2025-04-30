@@ -66,6 +66,29 @@ export default function SearchBar({
   useEffect(() => {
     setHighlightedIndex(0);
   }, [suggestions]);
+  
+  // Initialize with default location and trigger initial search
+  useEffect(() => {
+    if (initialLocation && initialLatitude && initialLongitude) {
+      console.log('Initializing search with:', initialLocation, initialLatitude, initialLongitude);
+      // Make sure we have the initial location set properly
+      setLocationText(initialLocation);
+      setSelectedLocation({
+        locationLabel: initialLocation,
+        latitude: initialLatitude,
+        longitude: initialLongitude
+      });
+      
+      // Trigger initial search with default location
+      onSearch({
+        location: initialLocation,
+        latitude: initialLatitude,
+        longitude: initialLongitude,
+        startDate: null,
+        endDate: null
+      });
+    }
+  }, []);
 
   const fetchGeocodingSuggestions = useCallback(
     debounce(async (query: string) => {

@@ -11,10 +11,11 @@ export default function App() {
   const [sitters, setSitters] = useState<Sitter[]>([]);
   const [isLoading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Seattle coordinates for Pike Place Market
   const [searchLocation, setSearchLocation] = useState<string>('Seattle, WA');
   const [searchCoords, setSearchCoords] = useState<{ latitude: number; longitude: number }>({
-    latitude: 47.6062,
-    longitude: -122.3321
+    latitude: 47.6097,
+    longitude: -122.3422
   });
   const [searchDates, setSearchDates] = useState<{ startDate: Date | null; endDate: Date | null }>({
     startDate: null,
@@ -27,7 +28,7 @@ export default function App() {
     service: null,
     petType: null,
     dogSize: null,
-    distance: null,
+    distance: 50, // Set a default distance of 50 miles
     topSittersOnly: false,
     specialNeeds: null,
     homeFeatures: null,
@@ -69,7 +70,15 @@ export default function App() {
         query.homeFeatures.forEach(feature => params.append('homeFeatures', feature));
       }
       
-      if (query.distance) params.append('distance', query.distance.toString());
+      // IMPORTANT - FIX: Make sure distance filter is included
+      // Debug distance value:
+      console.log('Distance filter value:', query.distance);
+      
+      // Check for undefined, null, or empty string
+      if (query.distance !== undefined && query.distance !== null) {
+        params.append('distance', query.distance.toString());
+      }
+      
       if (query.topSittersOnly) params.append('topSittersOnly', 'true');
       if (query.sort) params.append('sort', query.sort);
       
@@ -80,6 +89,8 @@ export default function App() {
       const queryString = params.toString();
       const endpoint = `/api/v1/sitters/search${queryString ? `?${queryString}` : ''}`;
       
+      console.log('Fetching sitters with query:', queryString);
+      
       const response = await fetch(endpoint);
       
       if (!response.ok) {
@@ -88,6 +99,14 @@ export default function App() {
       
       const data: SearchResponse = await response.json();
       setSitters(data.sitters);
+      
+      // Update search coordinates with the returned coordinates from API
+      if (data.query && data.query.latitude && data.query.longitude) {
+        setSearchCoords({
+          latitude: data.query.latitude,
+          longitude: data.query.longitude
+        });
+      }
     } catch (e: any) {
       setError(e.message);
       setSitters([]);
@@ -139,7 +158,7 @@ export default function App() {
       service: null,
       petType: null,
       dogSize: null,
-      distance: null,
+      distance: 50, // Keep default distance of 50 miles
       topSittersOnly: false,
       specialNeeds: null,
       homeFeatures: null,
@@ -195,9 +214,8 @@ export default function App() {
     });
   };
 
-  useEffect(() => {
-    fetchSitters();
-  }, []);
+  // We'll no longer do initial fetch here since SearchBar will trigger it
+  // This avoids double-fetching at startup
 
   return (
     <div className="app">
@@ -251,6 +269,7 @@ export default function App() {
               longitude={searchCoords.longitude}
               onSitterSelect={handleSitterSelect}
               onMapMoved={handleMapMoved}
+              filteredSitters={sitters} // All sitters shown normally when no filtering is active
             />
           )}
         </section>

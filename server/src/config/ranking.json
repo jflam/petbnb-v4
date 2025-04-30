@@ -1,0 +1,7 @@
+{
+  "distance": 0.4,
+  "rating": 0.25,
+  "availability": 0.15,
+  "responseRate": 0.1,
+  "repeatClient": 0.1
+}

@@ -46,11 +46,12 @@ export default function SitterGrid({
 
   return (
     <div className="sitter-grid">
-      {sitters.map(sitter => (
+      {sitters.map((sitter, index) => (
         <SitterCard 
           key={sitter.id} 
           sitter={sitter} 
-          onSelect={onSitterSelect} 
+          onSelect={onSitterSelect}
+          index={index}
         />
       ))}
     </div>

@@ -2,7 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import 'dotenv/config';
 import db from './db';
-import { geocode, addPrivacyOffset } from './services/geocoder';
+import { geocode, addPrivacyOffset, Coords } from './services/geocoder';
+import rankingConfig from './config/ranking.json';
+import path from 'path';
+import fs from 'fs';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -68,9 +71,9 @@ app.get('/api/fortunes/random', async (_req, res) => {
 // Sitter search endpoint
 app.get('/api/v1/sitters/search', async (req, res) => {
   try {
-    // Default location (Seattle)
-    const defaultLat = 47.6062;
-    const defaultLon = -122.3321;
+    // Default location (Seattle, WA - Pike Place Market)
+    const defaultLat = 47.6097;
+    const defaultLon = -122.3422;
 
     // Extract query parameters
     let {
@@ -87,10 +90,30 @@ app.get('/api/v1/sitters/search', async (req, res) => {
       topSittersOnly,
       startDate,
       endDate,
-      sort = 'distance'
+      sort = 'distance',
+      address
     } = req.query;
     
-    // If only location is provided (no lat/lng), try to geocode it
+    // Enhanced logging with parameter types to debug distance filter issue
+    console.log('Received request with parameters:', { 
+      location,
+      latitude, 
+      longitude,
+      maxDistance,
+      maxDistanceType: maxDistance !== undefined ? typeof maxDistance : 'undefined',
+      maxDistanceValue: maxDistance !== undefined ? maxDistance : 'undefined',
+      topSittersOnly,
+      sort
+    });
+    
+    // 1. Location handling:
+    // a. If address is provided, treat it as authoritative source
+    // b. Otherwise use location + lat/lng
+    if (address) {
+      location = address;
+    }
+    
+    // If only location is provided (no lat/lng), geocode it
     if (location && (!latitude || latitude === defaultLat) && (!longitude || longitude === defaultLon)) {
       try {
         const results = await geocode(location as string);
@@ -160,6 +183,7 @@ app.get('/api/v1/sitters/search', async (req, res) => {
       }
     }
 
+    // Filter by top sitters only
     if (topSittersOnly === 'true') {
       query = query.where('top_sitter', true);
     }
@@ -167,32 +191,133 @@ app.get('/api/v1/sitters/search', async (req, res) => {
     // Get results
     const sitters = await query;
 
-    // Calculate distance and filter by maxDistance if provided
-    const sittersWithDistance = sitters.map(sitter => {
+    // 2. Geocode sitters with null coordinates and update them in the database
+    const sitterUpdatePromises: Promise<any>[] = [];
+    
+    for (const sitter of sitters) {
+      if (sitter.latitude === null || sitter.longitude === null) {
+        try {
+          // Geocode the sitter's address
+          const results = await geocode(sitter.address);
+          if (results && results.length > 0) {
+            // Update the sitter's coordinates in memory
+            sitter.latitude = results[0].latitude;
+            sitter.longitude = results[0].longitude;
+            
+            // Queue a database update for the coordinates
+            sitterUpdatePromises.push(
+              db('sitters')
+                .where('id', sitter.id)
+                .update({
+                  latitude: results[0].latitude,
+                  longitude: results[0].longitude
+                })
+            );
+          }
+        } catch (error) {
+          console.error(`Error geocoding sitter address for ${sitter.name}:`, error);
+        }
+      }
+    }
+    
+    // Execute all database updates in parallel
+    if (sitterUpdatePromises.length > 0) {
+      await Promise.allSettled(sitterUpdatePromises);
+    }
+
+    // 3. Calculate distance using Haversine and normalize signals for ranking
+    const sittersWithMetrics = sitters.map(sitter => {
+      // Calculate distance
       const distance = calculateDistance(
         Number(latitude),
         Number(longitude),
         sitter.latitude,
         sitter.longitude
       );
-      return { ...sitter, distance };
+      
+      // Calculate days since availability update
+      const availabilityDate = new Date(sitter.availability_updated_at);
+      const now = new Date();
+      const daysSinceUpdate = Math.floor((now.getTime() - availabilityDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      // Calculate repeat client percentage
+      const totalClients = sitter.review_count;
+      const repeatPercentage = totalClients > 0 ? sitter.repeat_client_count / totalClients : 0;
+      
+      // For median response time, lower is better
+      const responseScore = sitter.median_response_time 
+        ? Math.max(0, 1 - (sitter.median_response_time / 24)) // Normalize: 0h = 1, 24h+ = 0
+        : 0.5; // Default score if missing
+      
+      return {
+        ...sitter,
+        distance,
+        metrics: {
+          distanceScore: 0, // Will be calculated after normalization
+          ratingScore: sitter.rating / 5, // Normalize rating to 0-1
+          availabilityScore: Math.max(0, 1 - (daysSinceUpdate / 10)), // Newer = better, over 10 days old = 0
+          responseScore,
+          repeatClientScore: repeatPercentage
+        }
+      };
     });
 
-    // Filter by distance if maxDistance is provided
-    const filteredSitters = maxDistance
-      ? sittersWithDistance.filter(sitter => sitter.distance <= Number(maxDistance))
-      : sittersWithDistance;
+    // 4. Filter by maximum distance if provided
+    // Fix for maxDistance filter - ensure it's properly converted to number
+    let maxDistanceNum = null;
+    if (maxDistance !== undefined && maxDistance !== null) {
+      maxDistanceNum = Number(maxDistance);
+      console.log('Filtering by max distance:', maxDistanceNum);
+    }
+    
+    const filteredSitters = maxDistanceNum && !isNaN(maxDistanceNum)
+      ? sittersWithMetrics.filter(sitter => sitter.distance <= maxDistanceNum)
+      : sittersWithMetrics;
+    
+    if (filteredSitters.length === 0) {
+      return res.json({
+        count: 0,
+        sitters: [],
+        query: {
+          location: location || 'Seattle, WA',
+          latitude,
+          longitude,
+          startDate: startDate || null,
+          endDate: endDate || null,
+          sort
+        }
+      });
+    }
 
-    // Sort results based on the sort parameter
-    const sortedSitters = filteredSitters.sort((a, b) => {
+    // 5. Normalize distance score (lowest distance gets highest score)
+    const maxDist = Math.max(...filteredSitters.map(s => s.distance));
+    filteredSitters.forEach(sitter => {
+      sitter.metrics.distanceScore = maxDist > 0 ? 1 - (sitter.distance / maxDist) : 1;
+    });
+
+    // 6. Calculate weighted score based on ranking config
+    filteredSitters.forEach(sitter => {
+      sitter.rankScore = (
+        rankingConfig.distance * sitter.metrics.distanceScore +
+        rankingConfig.rating * sitter.metrics.ratingScore +
+        rankingConfig.availability * sitter.metrics.availabilityScore +
+        rankingConfig.responseRate * sitter.metrics.responseScore +
+        rankingConfig.repeatClient * sitter.metrics.repeatClientScore
+      );
+    });
+
+    // 7. Sort results based on the sort parameter
+    const sortedSitters = [...filteredSitters]; // Create a copy for sorting
+    
+    sortedSitters.sort((a, b) => {
       switch (sort) {
         case 'price':
           // First by price (lowest first)
           if (a.rate !== b.rate) {
             return a.rate - b.rate;
           }
-          // Then by rating (highest first)
-          return b.rating - a.rating;
+          // Then by rank score
+          return b.rankScore - a.rankScore;
           
         case 'rating':
           // First by rating (highest first)
@@ -203,25 +328,17 @@ app.get('/api/v1/sitters/search', async (req, res) => {
           if (a.repeat_client_count !== b.repeat_client_count) {
             return b.repeat_client_count - a.repeat_client_count;
           }
-          // Then by distance
-          return a.distance - b.distance;
+          // Then by rank score
+          return b.rankScore - a.rankScore;
         
-        case 'distance':
+        case 'ranked':
         default:
-          // First by distance
-          if (a.distance !== b.distance) {
-            return a.distance - b.distance;
-          }
-          // Then by rating (highest first)
-          if (a.rating !== b.rating) {
-            return b.rating - a.rating;
-          }
-          // Then by repeat clients (highest first)
-          return b.repeat_client_count - a.repeat_client_count;
+          // By calculated rank score
+          return b.rankScore - a.rankScore;
       }
     });
 
-    // Process data for response (parse JSON strings)
+    // 8. Process data for response (parse JSON strings)
     const processedSitters = sortedSitters.map(sitter => ({
       ...sitter,
       services: JSON.parse(sitter.services),
