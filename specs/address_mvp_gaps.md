@@ -142,6 +142,7 @@ Geocoding is the process of converting human-readable addresses or place names i
 ## Seed Data Enhancements
 
 - Extend `02_sitters_seed.js` entries to include the following new fields matching our updated schema:
+  - `address`: full street address (e.g. "1201 3rd Ave, Seattle, WA 98101")  <!-- NEW -->
   - `special_needs`: array of strings (e.g. Puppy, Senior, Medication-required, Reactive)
   - `home_features`: array of strings (e.g. Fenced Yard, Smoke-free, No other pets)
   - `median_response_time`: number (hours)
@@ -150,6 +151,8 @@ Geocoding is the process of converting human-readable addresses or place names i
   - `rating`: float (1.0–5.0)
   - `review_count`: integer
   - `top_sitter`: boolean flag for high-performance sitters
+- Update DB migration (`20250423_create_sitters_table.js`) to add  
+  `table.string('address').notNullable();`  <!-- NEW -->
 - Ensure seeds cover all new filter dimensions, including:
   - Every pet type (dogs, cats, birds, rodents)
   - Full dog size ranges (XS: 0–15 lbs, S: 16–40 lbs, L, XL)

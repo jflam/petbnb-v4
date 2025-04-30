@@ -14,13 +14,14 @@ exports.up = function(knex) {
     table.string('location').notNullable();
     table.decimal('latitude', 9, 6).notNullable();
     table.decimal('longitude', 9, 6).notNullable();
+    table.string('address').notNullable(); 
     table.boolean('verified').defaultTo(false);
     table.boolean('top_sitter').defaultTo(false);
     table.timestamp('availability_updated_at').defaultTo(knex.fn.now());
-    table.json('services').notNullable(); // Array of services: boarding, house_sitting, drop_in, day_care, walking
-    table.json('pet_types').notNullable(); // Array of pet types: dogs, cats, etc.
-    table.json('dog_sizes').nullable(); // Array of accepted dog sizes: small, medium, large, giant
-    table.json('certifications').nullable(); // Array of certifications
+    table.json('services').notNullable(); 
+    table.json('pet_types').notNullable(); 
+    table.json('dog_sizes').nullable(); 
+    table.json('certifications').nullable(); 
     table.timestamps(true, true);
   });
 };

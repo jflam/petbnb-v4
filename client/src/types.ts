@@ -9,6 +9,7 @@ export interface Sitter {
   location: string;
   latitude: number;
   longitude: number;
+  address: string; // NEW
   verified: boolean;
   top_sitter: boolean;
   availability_updated_at: string;
