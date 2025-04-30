@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
+import 'dotenv/config';
 import db from './db';
+import { geocode, addPrivacyOffset } from './services/geocoder';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -27,6 +29,9 @@ interface Sitter {
   pet_types: string;
   dog_sizes: string | null;
   certifications: string | null;
+  special_needs: string | null;
+  home_features: string | null;
+  median_response_time: number | null;
   distance?: number;
 }
 
@@ -68,7 +73,7 @@ app.get('/api/v1/sitters/search', async (req, res) => {
     const defaultLon = -122.3321;
 
     // Extract query parameters
-    const {
+    let {
       location,
       latitude = defaultLat,
       longitude = defaultLon,
@@ -79,8 +84,25 @@ app.get('/api/v1/sitters/search', async (req, res) => {
       petType,
       dogSize,
       distance: maxDistance,
-      topSittersOnly
+      topSittersOnly,
+      startDate,
+      endDate,
+      sort = 'distance'
     } = req.query;
+    
+    // If only location is provided (no lat/lng), try to geocode it
+    if (location && (!latitude || latitude === defaultLat) && (!longitude || longitude === defaultLon)) {
+      try {
+        const results = await geocode(location as string);
+        if (results && results.length > 0) {
+          latitude = results[0].latitude;
+          longitude = results[0].longitude;
+        }
+      } catch (error) {
+        console.error('Error geocoding location:', error);
+        // Fall back to default coordinates if geocoding fails
+      }
+    }
 
     // Base query
     let query = db<Sitter>('sitters');
@@ -106,8 +128,36 @@ app.get('/api/v1/sitters/search', async (req, res) => {
       query = query.whereRaw('JSON_EXTRACT(pet_types, "$") LIKE ?', [`%${petType}%`]);
     }
 
+    // Handle multiple dog sizes (array) or single dog size
     if (dogSize) {
-      query = query.whereRaw('JSON_EXTRACT(dog_sizes, "$") LIKE ?', [`%${dogSize}%`]);
+      if (Array.isArray(dogSize)) {
+        const sizeConditions = dogSize.map(size => `JSON_EXTRACT(dog_sizes, "$") LIKE '%${size}%'`);
+        query = query.whereRaw(`(${sizeConditions.join(' OR ')})`);
+      } else {
+        query = query.whereRaw('JSON_EXTRACT(dog_sizes, "$") LIKE ?', [`%${dogSize}%`]);
+      }
+    }
+
+    // Filter by special needs if provided
+    const specialNeeds = req.query.specialNeeds;
+    if (specialNeeds) {
+      if (Array.isArray(specialNeeds)) {
+        const needsConditions = specialNeeds.map(need => `JSON_EXTRACT(special_needs, "$") LIKE '%${need}%'`);
+        query = query.whereRaw(`(${needsConditions.join(' OR ')})`);
+      } else {
+        query = query.whereRaw('JSON_EXTRACT(special_needs, "$") LIKE ?', [`%${specialNeeds}%`]);
+      }
+    }
+
+    // Filter by home features if provided
+    const homeFeatures = req.query.homeFeatures;
+    if (homeFeatures) {
+      if (Array.isArray(homeFeatures)) {
+        const featureConditions = homeFeatures.map(feature => `JSON_EXTRACT(home_features, "$") LIKE '%${feature}%'`);
+        query = query.whereRaw(`(${featureConditions.join(' OR ')})`);
+      } else {
+        query = query.whereRaw('JSON_EXTRACT(home_features, "$") LIKE ?', [`%${homeFeatures}%`]);
+      }
     }
 
     if (topSittersOnly === 'true') {
@@ -133,18 +183,42 @@ app.get('/api/v1/sitters/search', async (req, res) => {
       ? sittersWithDistance.filter(sitter => sitter.distance <= Number(maxDistance))
       : sittersWithDistance;
 
-    // Sort by distance
+    // Sort results based on the sort parameter
     const sortedSitters = filteredSitters.sort((a, b) => {
-      // First by distance
-      if (a.distance !== b.distance) {
-        return a.distance - b.distance;
+      switch (sort) {
+        case 'price':
+          // First by price (lowest first)
+          if (a.rate !== b.rate) {
+            return a.rate - b.rate;
+          }
+          // Then by rating (highest first)
+          return b.rating - a.rating;
+          
+        case 'rating':
+          // First by rating (highest first)
+          if (a.rating !== b.rating) {
+            return b.rating - a.rating;
+          }
+          // Then by repeat clients (highest first)
+          if (a.repeat_client_count !== b.repeat_client_count) {
+            return b.repeat_client_count - a.repeat_client_count;
+          }
+          // Then by distance
+          return a.distance - b.distance;
+        
+        case 'distance':
+        default:
+          // First by distance
+          if (a.distance !== b.distance) {
+            return a.distance - b.distance;
+          }
+          // Then by rating (highest first)
+          if (a.rating !== b.rating) {
+            return b.rating - a.rating;
+          }
+          // Then by repeat clients (highest first)
+          return b.repeat_client_count - a.repeat_client_count;
       }
-      // Then by rating (highest first)
-      if (a.rating !== b.rating) {
-        return b.rating - a.rating;
-      }
-      // Then by repeat clients (highest first)
-      return b.repeat_client_count - a.repeat_client_count;
     });
 
     // Process data for response (parse JSON strings)
@@ -153,7 +227,9 @@ app.get('/api/v1/sitters/search', async (req, res) => {
       services: JSON.parse(sitter.services),
       pet_types: JSON.parse(sitter.pet_types),
       dog_sizes: sitter.dog_sizes ? JSON.parse(sitter.dog_sizes) : null,
-      certifications: sitter.certifications ? JSON.parse(sitter.certifications) : null
+      certifications: sitter.certifications ? JSON.parse(sitter.certifications) : null,
+      special_needs: sitter.special_needs ? JSON.parse(sitter.special_needs) : null,
+      home_features: sitter.home_features ? JSON.parse(sitter.home_features) : null
     }));
 
     res.json({
@@ -162,12 +238,36 @@ app.get('/api/v1/sitters/search', async (req, res) => {
       query: {
         location: location || 'Seattle, WA',
         latitude,
-        longitude
+        longitude,
+        startDate: startDate || null,
+        endDate: endDate || null,
+        sort
       }
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
+// Geocoding endpoint
+app.get('/api/geocode', async (req, res) => {
+  try {
+    const query = req.query.q as string;
+    
+    if (!query || query.length < 2) {
+      return res.status(400).json({ error: 'Query must be at least 2 characters' });
+    }
+
+    const results = await geocode(query);
+    
+    // Apply privacy offset to the coordinates
+    const resultsWithOffset = results.map(result => addPrivacyOffset(result));
+    
+    res.json(resultsWithOffset);
+  } catch (err) {
+    console.error('Geocoding error:', err);
+    res.status(500).json({ error: 'Geocoding service error' });
   }
 });
 

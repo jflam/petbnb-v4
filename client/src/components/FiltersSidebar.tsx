@@ -1,5 +1,12 @@
 import React from 'react';
-import { FilterState, ServiceOptions, PetTypeOptions, DogSizeOptions } from '../types';
+import { 
+  FilterState, 
+  ServiceOptions, 
+  PetTypeOptions, 
+  DogSizeOptions,
+  SpecialNeedsOptions,
+  HomeFeaturesOptions
+} from '../types';
 
 interface FiltersSidebarProps {
   filters: FilterState;
@@ -26,10 +33,40 @@ export default function FiltersSidebar({
     });
   };
 
-  const handleDogSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleDogSizeChange = (size: string) => {
+    // Toggle the size in the array of selected sizes
+    const currentSizes = filters.dogSize || [];
+    const newSizes = currentSizes.includes(size)
+      ? currentSizes.filter(s => s !== size)
+      : [...currentSizes, size];
+    
     onFilterChange({
       ...filters,
-      dogSize: e.target.value || null
+      dogSize: newSizes.length > 0 ? newSizes : null
+    });
+  };
+
+  const handleSpecialNeedsChange = (need: string) => {
+    const currentNeeds = filters.specialNeeds || [];
+    const newNeeds = currentNeeds.includes(need)
+      ? currentNeeds.filter(n => n !== need)
+      : [...currentNeeds, need];
+    
+    onFilterChange({
+      ...filters,
+      specialNeeds: newNeeds.length > 0 ? newNeeds : null
+    });
+  };
+
+  const handleHomeFeaturesChange = (feature: string) => {
+    const currentFeatures = filters.homeFeatures || [];
+    const newFeatures = currentFeatures.includes(feature)
+      ? currentFeatures.filter(f => f !== feature)
+      : [...currentFeatures, feature];
+    
+    onFilterChange({
+      ...filters,
+      homeFeatures: newFeatures.length > 0 ? newFeatures : null
     });
   };
 
@@ -104,22 +141,60 @@ export default function FiltersSidebar({
         </select>
       </div>
 
+      {/* Dog Size Checkboxes instead of dropdown */}
+      {(filters.petType === 'dogs' || filters.petType === null) && (
+        <div className="filter-section">
+          <label>Dog Size</label>
+          <div className="checkbox-group">
+            {DogSizeOptions.map((option) => (
+              <div key={option.value} className="checkbox-item">
+                <input
+                  type="checkbox"
+                  id={`dog-size-${option.value}`}
+                  checked={(filters.dogSize || []).includes(option.value)}
+                  onChange={() => handleDogSizeChange(option.value)}
+                />
+                <label htmlFor={`dog-size-${option.value}`}>{option.label}</label>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Special Needs Checkboxes */}
       <div className="filter-section">
-        <label htmlFor="dog-size-filter">Dog Size</label>
-        <select
-          id="dog-size-filter"
-          className="filter-select"
-          value={filters.dogSize || ''}
-          onChange={handleDogSizeChange}
-          disabled={filters.petType !== 'dogs' && filters.petType !== null}
-        >
-          <option value="">All Sizes</option>
-          {DogSizeOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
+        <label>Special Needs</label>
+        <div className="checkbox-group">
+          {SpecialNeedsOptions.map((option) => (
+            <div key={option.value} className="checkbox-item">
+              <input
+                type="checkbox"
+                id={`special-need-${option.value}`}
+                checked={(filters.specialNeeds || []).includes(option.value)}
+                onChange={() => handleSpecialNeedsChange(option.value)}
+              />
+              <label htmlFor={`special-need-${option.value}`}>{option.label}</label>
+            </div>
           ))}
-        </select>
+        </div>
+      </div>
+
+      {/* Home Features Checkboxes */}
+      <div className="filter-section">
+        <label>Home Features</label>
+        <div className="checkbox-group">
+          {HomeFeaturesOptions.map((option) => (
+            <div key={option.value} className="checkbox-item">
+              <input
+                type="checkbox"
+                id={`home-feature-${option.value}`}
+                checked={(filters.homeFeatures || []).includes(option.value)}
+                onChange={() => handleHomeFeaturesChange(option.value)}
+              />
+              <label htmlFor={`home-feature-${option.value}`}>{option.label}</label>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="filter-section">

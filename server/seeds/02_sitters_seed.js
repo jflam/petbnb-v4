@@ -30,7 +30,10 @@ exports.seed = async function(knex) {
       services: JSON.stringify(['boarding', 'house_sitting', 'drop_in']),
       pet_types: JSON.stringify(['dogs', 'cats']),
       dog_sizes: JSON.stringify(['small', 'medium', 'large']),
-      certifications: JSON.stringify(['background_check', 'first_aid'])
+      certifications: JSON.stringify(['background_check', 'first_aid']),
+      special_needs: JSON.stringify(['senior', 'medication']),
+      home_features: JSON.stringify(['fenced_yard', 'smoke_free']),
+      median_response_time: 1
     },
     {
       name: 'Michael Chen',
@@ -48,7 +51,10 @@ exports.seed = async function(knex) {
       services: JSON.stringify(['boarding', 'day_care', 'walking']),
       pet_types: JSON.stringify(['dogs']),
       dog_sizes: JSON.stringify(['medium', 'large']),
-      certifications: JSON.stringify(['background_check', 'dog_training'])
+      certifications: JSON.stringify(['background_check', 'dog_training']),
+      special_needs: JSON.stringify(['puppy', 'reactive']),
+      home_features: JSON.stringify(['fenced_yard']),
+      median_response_time: 2
     },
     {
       name: 'Emily Rodriguez',
@@ -66,7 +72,10 @@ exports.seed = async function(knex) {
       services: JSON.stringify(['house_sitting', 'drop_in']),
       pet_types: JSON.stringify(['cats', 'birds']),
       dog_sizes: null,
-      certifications: JSON.stringify(['background_check'])
+      certifications: JSON.stringify(['background_check']),
+      special_needs: JSON.stringify(['senior', 'medication']),
+      home_features: JSON.stringify(['smoke_free']),
+      median_response_time: 3
     },
     {
       name: 'David Wilson',
@@ -84,7 +93,10 @@ exports.seed = async function(knex) {
       services: JSON.stringify(['boarding', 'day_care']),
       pet_types: JSON.stringify(['dogs', 'cats']),
       dog_sizes: JSON.stringify(['small', 'medium']),
-      certifications: JSON.stringify(['background_check', 'first_aid', 'dog_training'])
+      certifications: JSON.stringify(['background_check', 'first_aid', 'dog_training']),
+      special_needs: JSON.stringify(['puppy', 'reactive']),
+      home_features: JSON.stringify(['fenced_yard', 'no_other_pets']),
+      median_response_time: 1
     },
     {
       name: 'Jessica Martinez',
@@ -102,7 +114,10 @@ exports.seed = async function(knex) {
       services: JSON.stringify(['drop_in', 'walking']),
       pet_types: JSON.stringify(['dogs', 'cats', 'rodents']),
       dog_sizes: JSON.stringify(['small', 'medium']),
-      certifications: JSON.stringify(['background_check'])
+      certifications: JSON.stringify(['background_check']),
+      special_needs: JSON.stringify(['medication']),
+      home_features: JSON.stringify(['smoke_free', 'no_other_pets']),
+      median_response_time: 4
     },
     {
       name: 'Daniel Thompson',
@@ -120,7 +135,10 @@ exports.seed = async function(knex) {
       services: JSON.stringify(['boarding', 'house_sitting']),
       pet_types: JSON.stringify(['dogs']),
       dog_sizes: JSON.stringify(['large', 'giant']),
-      certifications: JSON.stringify(['background_check', 'first_aid'])
+      certifications: JSON.stringify(['background_check', 'first_aid']),
+      special_needs: JSON.stringify(['reactive', 'puppy']),
+      home_features: JSON.stringify(['fenced_yard']),
+      median_response_time: 2
     },
     {
       name: 'Sophia Lee',
@@ -138,7 +156,10 @@ exports.seed = async function(knex) {
       services: JSON.stringify(['boarding', 'house_sitting', 'day_care']),
       pet_types: JSON.stringify(['dogs', 'cats']),
       dog_sizes: JSON.stringify(['small', 'medium', 'large']),
-      certifications: JSON.stringify(['background_check', 'first_aid', 'dog_training'])
+      certifications: JSON.stringify(['background_check', 'first_aid', 'dog_training']),
+      special_needs: JSON.stringify(['senior', 'puppy', 'medication']),
+      home_features: JSON.stringify(['fenced_yard', 'smoke_free']),
+      median_response_time: 1
     },
     {
       name: 'James Anderson',
@@ -156,7 +177,10 @@ exports.seed = async function(knex) {
       services: JSON.stringify(['drop_in', 'walking']),
       pet_types: JSON.stringify(['dogs']),
       dog_sizes: JSON.stringify(['small', 'medium']),
-      certifications: null
+      certifications: null,
+      special_needs: JSON.stringify(['reactive']),
+      home_features: JSON.stringify(['no_other_pets']),
+      median_response_time: 5
     },
     {
       name: 'Olivia Garcia',
@@ -174,7 +198,10 @@ exports.seed = async function(knex) {
       services: JSON.stringify(['boarding', 'day_care']),
       pet_types: JSON.stringify(['dogs', 'cats', 'birds']),
       dog_sizes: JSON.stringify(['small', 'medium']),
-      certifications: JSON.stringify(['background_check'])
+      certifications: JSON.stringify(['background_check']),
+      special_needs: JSON.stringify(['puppy', 'senior']),
+      home_features: JSON.stringify(['fenced_yard', 'smoke_free']),
+      median_response_time: 2
     },
     {
       name: 'Ethan Nguyen',
@@ -192,7 +219,10 @@ exports.seed = async function(knex) {
       services: JSON.stringify(['house_sitting', 'drop_in']),
       pet_types: JSON.stringify(['cats']),
       dog_sizes: null,
-      certifications: JSON.stringify(['background_check'])
+      certifications: JSON.stringify(['background_check']),
+      special_needs: JSON.stringify(['senior', 'medication']),
+      home_features: JSON.stringify(['smoke_free', 'no_other_pets']),
+      median_response_time: 3
     }
   ]);
 };

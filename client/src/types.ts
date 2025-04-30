@@ -16,6 +16,9 @@ export interface Sitter {
   pet_types: string[];
   dog_sizes: string[] | null;
   certifications: string[] | null;
+  special_needs: string[] | null;
+  home_features: string[] | null;
+  median_response_time: number | null;
   distance: number;
 }
 
@@ -28,9 +31,15 @@ export interface SearchQuery {
   minRating?: number;
   service?: string;
   petType?: string;
-  dogSize?: string;
+  dogSize?: string[] | string; // Updated to support multiple sizes
   distance?: number;
   topSittersOnly?: boolean;
+  startDate?: string | null;
+  endDate?: string | null;
+  sort?: 'distance' | 'price' | 'rating';
+  specialNeeds?: string[];
+  homeFeatures?: string[];
+  view?: 'list' | 'map';
 }
 
 export interface SearchResponse {
@@ -40,6 +49,9 @@ export interface SearchResponse {
     location: string;
     latitude: number;
     longitude: number;
+    startDate: string | null;
+    endDate: string | null;
+    sort: string;
   };
 }
 
@@ -49,9 +61,13 @@ export interface FilterState {
   minRating: number | null;
   service: string | null;
   petType: string | null;
-  dogSize: string | null;
+  dogSize: string[] | null; // Updated to support multiple sizes
   distance: number | null;
   topSittersOnly: boolean;
+  specialNeeds: string[] | null;
+  homeFeatures: string[] | null;
+  sort: 'distance' | 'price' | 'rating';
+  view: 'list' | 'map';
 }
 
 export const ServiceOptions = [
@@ -70,8 +86,33 @@ export const PetTypeOptions = [
 ];
 
 export const DogSizeOptions = [
-  { value: 'small', label: 'Small (0-15 lbs)' },
-  { value: 'medium', label: 'Medium (16-40 lbs)' },
+  { value: 'xs', label: 'Extra Small (0-15 lbs)' },
+  { value: 'small', label: 'Small (16-25 lbs)' },
+  { value: 'medium', label: 'Medium (26-40 lbs)' },
   { value: 'large', label: 'Large (41-100 lbs)' },
-  { value: 'giant', label: 'Giant (100+ lbs)' }
+  { value: 'xl', label: 'Extra Large (100+ lbs)' }
+];
+
+export const SpecialNeedsOptions = [
+  { value: 'puppy', label: 'Puppy' },
+  { value: 'senior', label: 'Senior' },
+  { value: 'medication', label: 'Medication Required' },
+  { value: 'reactive', label: 'Reactive' }
+];
+
+export const HomeFeaturesOptions = [
+  { value: 'fenced_yard', label: 'Fenced Yard' },
+  { value: 'smoke_free', label: 'Smoke-Free' },
+  { value: 'no_other_pets', label: 'No Other Pets' }
+];
+
+export const SortOptions = [
+  { value: 'distance', label: 'Distance (nearest first)' },
+  { value: 'price', label: 'Price (lowest first)' },
+  { value: 'rating', label: 'Rating (highest first)' }
+];
+
+export const ViewOptions = [
+  { value: 'list', label: 'List View' },
+  { value: 'map', label: 'Map View' }
 ];
