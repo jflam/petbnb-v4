@@ -1,101 +1,105 @@
 # PetBnB
 
-PetBnB is an Airbnb-style marketplace for pet sitting services.
+PetBnB is an Airbnb‑style marketplace that connects pet owners with verified sitters.
 
-## Overview
+## Tech Stack
+- **Frontend**: React 19 + TypeScript + Vite (`client/`)
+- **Mapping**: Mapbox GL via `react‑map‑gl`
+- **Backend**: Express + TypeScript (`server/`)
+- **Database**: SQLite (managed with Knex)
+- **E2E**: Playwright
 
-The PetBnB platform connects pet owners with verified sitters. The core value proposition is to make finding safe, reliable, and convenient care for pets as frictionless as booking a short-term rental.
+## Directory Structure
+- `client/` – React SPA
+- `server/` – REST/GraphQL API, DB migrations & seeds
+- `scripts/` – tooling and bootstrap helpers
+- `specs/` – product & migration plans
+- `README.md`, `CLAUDE.md` – project and dev docs
 
-## Features
+## Environment Variables
 
-### MVP: Sitter Discovery & Listing
-- Global search bar for location, dates, and keywords
-- Filters sidebar (service type, pet type, price, rating, etc.)
-- Responsive listing grid displaying sitter cards
-- Profile menu in top-right for future authentication
+| Scope    | Var                | Description                               |
+|----------|--------------------|-------------------------------------------|
+| server   | `MAPBOX_TOKEN`     | Mapbox access token *(required)*          |
+| client   | `VITE_MAPBOX_TOKEN`| Same token, exposed to the browser        |
 
-## Tech Stack
+Create the files below before running the app:
 
-- **Frontend:** React + TypeScript + Vite
-- **Backend:** Express + TypeScript
-- **Database:** SQLite with Knex.js ORM
-- **Testing:** Playwright for E2E tests
+```bash
+# server/.env (or copy server/.env.example)
+MAPBOX_TOKEN=pk.<your_token_here>
 
-## Getting Started
+# client/.env.local  (Vite picks up VITE_* automatically)
+VITE_MAPBOX_TOKEN=$MAPBOX_TOKEN
+```
 
-1. Install dependencies:
-   ```
+Get a free token at https://account.mapbox.com/.
+
+## Getting Started
+
+1. Install dependencies for all workspaces:
+   ```bash
    npm run bootstrap
    ```
 
-2. Start the development server:
+2. Add the environment files as shown above.
+
+3. Start development servers:
+   ```bash
+   npm run dev           # runs client & server concurrently
+   # or
+   npm run server        # backend only (http://localhost:4000)
+   npm run client        # frontend only (http://localhost:3000)
    ```
-   npm run dev
-   ```
 
-3. Open your browser and navigate to:
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:4000
+## Scripts
 
-## Development
+### Root  
+- `npm run dev`        – parallel client & server (via `concurrently`)  
+- `npm run bootstrap` – install deps in root, client, server
 
-### Directory Structure
-- `client/` - React frontend
-- `server/` - Express API backend
-- `scripts/` - Utility scripts
-- `specs/` - Project specifications
+### Server (`server/`)  
+- `npm run dev`        – hot‑reloading API + automatic DB migrate/seed  
+- `npm run build`      – compile TS -> `dist/`  
+- `npm run migrate`    – latest migrations  
+- `npm run seed`       – seed data
 
-### Commands
+### Client (`client/`)  
+- `npm run dev`        – Vite dev server + HMR  
+- `npm run build`      – production build (`client/dist`)  
+- `npm run preview`    – serve the build locally
 
-#### Root Commands
-- `npm run dev` - Run both server and client in parallel
-- `npm run server` - Run only the server
-- `npm run client` - Run only the client
-- `npm run bootstrap` - Install dependencies in root, server and client
+## Core Features (MVP)
+- Global search with location auto‑complete (Mapbox geocoding)
+- Rich filters: price, rating, service, pet type, dog size, special needs, home features
+- List / Map toggle with clustering & heat‑map for dense areas
+- Accessibility enhancements (keyboard navigation, screen‑reader live regions)
 
-#### Server Commands (server/)
-- `npm run dev` - Run with hot reload
-- `npm run build` - Compile TypeScript
-- `npm run migrate` - Run migrations
-- `npm run seed` - Seed database
+## API Endpoints
 
-#### Client Commands (client/)
-- `npm run dev` - Run Vite dev server
-- `npm run build` - Create production build
-- `npm run preview` - Preview production build
+### GET `/api/v1/sitters/search`
+Search sitters by location and filters.
 
-## API Endpoints
+Query params include:
+`location`, `latitude`, `longitude`, `minPrice`, `maxPrice`, `minRating`,  
+`service`, `petType`, `dogSize[]`, `distance`, `topSittersOnly`,  
+`specialNeeds[]`, `homeFeatures[]`, `startDate`, `endDate`, `sort`.
 
-### GET /api/v1/sitters/search
-Search for sitters based on various criteria.
+## Production Build
 
-Query Parameters:
-- `location` - City or ZIP code
-- `latitude`, `longitude` - Coordinates for distance calculation
-- `minPrice`, `maxPrice` - Price range in dollars
-- `minRating` - Minimum star rating
-- `service` - Service type (boarding, house_sitting, drop_in, day_care, walking)
-- `petType` - Type of pet (dogs, cats, birds, rodents)
-- `dogSize` - Size of dog (small, medium, large, giant)
-- `distance` - Maximum distance in miles
-- `topSittersOnly` - Boolean to show only top-rated sitters
-
-## Building for Production
-
-### Backend
+Backend:
 ```bash
 cd server
 npm run build
 NODE_ENV=production node dist/index.js
 ```
 
-### Frontend
+Frontend:
 ```bash
 cd client
 npm run build
-npm run preview # to preview the build locally
+npm run preview   # optional local preview
 ```
 
 ## License
-
-This project is private and proprietary.
+Private & proprietary – all rights reserved.
