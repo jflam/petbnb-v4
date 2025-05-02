@@ -34,8 +34,20 @@ interface Sitter {
   certifications: string | null;
   special_needs: string | null;
   home_features: string | null;
+  // New field from migration
+  address: string;
   median_response_time: number | null;
   distance?: number;
+  // Computed metrics and ranking score
+  metrics?: {
+    distanceScore: number;
+    ratingScore: number;
+    availabilityScore: number;
+    responseScore: number;
+    repeatClientScore: number;
+  };
+  rankScore?: number;
+
 }
 
 // Utility function to calculate distance between two points using Haversine formula
@@ -317,7 +329,7 @@ app.get('/api/v1/sitters/search', async (req, res) => {
             return a.rate - b.rate;
           }
           // Then by rank score
-          return b.rankScore - a.rankScore;
+          return ((b.rankScore ?? 0) - (a.rankScore ?? 0));
           
         case 'rating':
           // First by rating (highest first)
@@ -329,12 +341,12 @@ app.get('/api/v1/sitters/search', async (req, res) => {
             return b.repeat_client_count - a.repeat_client_count;
           }
           // Then by rank score
-          return b.rankScore - a.rankScore;
+          return ((b.rankScore ?? 0) - (a.rankScore ?? 0));
         
         case 'ranked':
         default:
           // By calculated rank score
-          return b.rankScore - a.rankScore;
+          return ((b.rankScore ?? 0) - (a.rankScore ?? 0));
       }
     });
 

@@ -47,3 +47,5 @@ Thumbs.db
 *.ntvs*
 *.njsproj
 *.sln
+
+**/.claude/settings.local.json
